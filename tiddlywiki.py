@@ -5,25 +5,34 @@
 #
 # Version:  0.2
 # Author:   Alexander F Rødseth <xyproto@archlinux.org>
-# Modified: 2018-04-05
+# Modified: 2022-03-08
 # License:  MIT
 #
 
 from sys import argv
 from os.path import join, exists
-from os import mkdir, system, environ
-
+from os import mkdir, system, environ, getcwd
+from argparse import ArgumentParser, RawTextHelpFormatter
 
 def main():
-    arguments = argv[1:]
-    if arguments:
-        where = arguments[0]
-    else:
-        where = join(environ['HOME'], '.tiddlywiki')
+    parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
+    parser.add_argument(
+            "location",
+            type=str,
+            default=getcwd(),
+            nargs="?",
+            help="Directory to create the tiddlywiki index.html file inside.\n"+
+                 "Will use the current directory if none is specified.")
+    args = parser.parse_args()
+
+    where = args.location
     goal = join(where, 'index.html')
+
     if not exists(where):
         mkdir(where)
+    if not exists(goal):
         system('cp /usr/share/tiddlywiki/empty.html %s' % (goal))
+    
     if ('BROWSER' in environ) and environ['BROWSER']:
         system(environ['BROWSER'] + " " + goal)
     else:
